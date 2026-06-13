@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Environment
+.env
+
+# Node
+node_modules/
+
+# Storage (runtime generated)
+storage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large Binaries (Avoid GitHub's 100MB file limit)
+ffmpeg.exe
+ffprobe.exe
