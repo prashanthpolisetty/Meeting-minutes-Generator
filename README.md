@@ -152,16 +152,13 @@ The project runs cloud-based LLM APIs to perform structured summarization withou
    * Add it to your `.env` file as `GEMINI_API_KEY`.
 
 ### 3. Backend Server Setup
-1. Navigate to the `meeting-minutes-ai` folder:
-   ```powershell
-   cd meeting-minutes-ai
-   ```
-2. Install the required Python packages:
+
+1. Install the required Python packages:
    ```powershell
    pip install -r requirements.txt
    ```
-3. Set up your environment variables by creating a `.env` file (see [Environment Variables](#-environment-variables) below).
-4. Run the FastAPI development server:
+2. Set up your environment variables by creating a `.env` file (see [Environment Variables](#-environment-variables) below).
+3. Run the FastAPI development server:
    ```powershell
    python -m uvicorn backend.main:app --reload
    ```
@@ -172,7 +169,7 @@ The project runs cloud-based LLM APIs to perform structured summarization withou
 ### 4. Frontend Dashboard Setup
 1. Open a new terminal and navigate to the frontend directory:
    ```powershell
-   cd meeting-minutes-ai/frontend
+   cd frontend
    ```
 2. Install dependencies:
    ```powershell
