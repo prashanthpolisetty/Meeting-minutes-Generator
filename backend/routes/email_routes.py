@@ -25,9 +25,13 @@ async def resend_email(meeting_id: str, background_tasks: BackgroundTasks):
             raise HTTPException(status_code=400, detail="No participants found to send email to")
             
         email_payload = {
+            "agenda": meeting.get("agenda", ""),
             "summary": meeting.get("summary", ""),
             "action_items": meeting.get("action_items", []),
-            "key_decisions": meeting.get("key_decisions", [])
+            "key_decisions": meeting.get("key_decisions", []),
+            "candidates": meeting.get("candidates", []),
+            "best_candidate_index": meeting.get("best_candidate_index", 0),
+            "best_candidate_reasoning": meeting.get("best_candidate_reasoning", "")
         }
         
         # Dispatch in background so the API returns quickly

@@ -20,6 +20,7 @@ class MeetingResponse(MeetingBase):
     status: str = "pending" # pending, processing, completed, failed
     audio_path: Optional[str] = None
     transcript: Optional[str] = None
+    agenda: Optional[str] = None
     summary: Optional[str] = None
     action_items: List[str] = []
     key_decisions: List[str] = []

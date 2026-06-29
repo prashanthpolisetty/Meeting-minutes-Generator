@@ -47,6 +47,7 @@ async def upload_meeting(
         "audio_path": str(file_path),
         "status": "pending",
         "transcript": None,
+        "agenda": None,
         "summary": None,
         "action_items": [],
         "key_decisions": [],

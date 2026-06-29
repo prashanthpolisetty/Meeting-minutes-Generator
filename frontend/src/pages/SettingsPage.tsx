@@ -40,7 +40,7 @@ export default function SettingsPage() {
   const [outputLanguage, setOutputLanguage] = useState(saved.outputLanguage || 'English');
 
   // Email
-  const [emailEnabled, setEmailEnabled] = useState(saved.emailEnabled ?? true);
+  const [emailEnabled, setEmailEnabled] = useState<boolean>(saved.emailEnabled ?? true);
   const [defaultEmail, setDefaultEmail] = useState(saved.defaultEmail || '');
   const [smtpHost, setSmtpHost] = useState(saved.smtpHost || 'smtp.gmail.com');
   const [smtpPort, setSmtpPort] = useState(saved.smtpPort || '587');

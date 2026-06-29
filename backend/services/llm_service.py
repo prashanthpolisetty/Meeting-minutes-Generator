@@ -15,18 +15,17 @@ from backend.config.settings import settings
 
 logger = logging.getLogger(__name__)
 
-async def generate_meeting_minutes(transcript: str) -> dict:
-    """Generate structured meeting minutes from a transcript using Gemini or Groq cloud APIs."""
-    
+async def generate_meeting_minutes_for_model(transcript: str, provider: str, model_name: str) -> dict:
+    """Generate structured meeting minutes from a transcript using a specific LLM provider and model."""
     if not transcript or not transcript.strip():
         logger.error("Empty transcript provided to LLM service.")
         raise ValueError("Cannot summarize an empty transcript")
 
-    # Prompt schema specification
     prompt = f"""
     You are an expert executive assistant. Analyze the following meeting transcript and generate a structured JSON object containing the meeting minutes.
     
-    The JSON object MUST have exactly these three keys:
+    The JSON object MUST have exactly these four keys:
+    - "agenda": A concise, one-line statement of the meeting's agenda.
     - "summary": A highly detailed and extensive summary of the meeting's purpose and general discussion. This summary MUST be very thorough, deeply describing the analysis and insights, and MUST be strictly more than 10 sentences/lines long.
     - "action_items": A list of strings, each describing a specific task, assignee (if mentioned), and deadline (if mentioned).
     - "key_decisions": A list of strings detailing the final decisions made during the meeting.
@@ -39,67 +38,36 @@ async def generate_meeting_minutes(transcript: str) -> dict:
     ---
     """
 
-    # --- ROUTE 1: Google Gemini API (Online Cloud Model) ---
-    if settings.LLM_PROVIDER.lower() == "gemini":
+    if provider.lower() == "gemini":
         if not settings.GEMINI_API_KEY or not settings.GEMINI_API_KEY.strip():
             logger.error("Gemini API requested but GEMINI_API_KEY is not configured.")
-            return {
-                "summary": "AI Summarization Failed: GEMINI_API_KEY is missing from environment. Please add it to your .env file.",
-                "action_items": [],
-                "key_decisions": []
-            }
+            raise ValueError("GEMINI_API_KEY is missing from environment.")
 
-        logger.info(f"Using Google Gemini API (model: {settings.GEMINI_MODEL}) in the cloud...")
+        logger.info(f"Using Google Gemini API (model: {model_name}) in the cloud...")
         
         def _call_gemini():
             genai.configure(api_key=settings.GEMINI_API_KEY)
             model = genai.GenerativeModel(
-                model_name=settings.GEMINI_MODEL,
+                model_name=model_name,
                 generation_config={"response_mime_type": "application/json"}
             )
             response = model.generate_content(prompt)
             return response.text
 
-        try:
-            logger.info("Awaiting online response from Gemini API...")
-            text = await asyncio.to_thread(_call_gemini)
-            text = text.strip()
-            
-            # Parse into dictionary
-            result = json.loads(text)
-            logger.info(f"✅ Successfully generated structured meeting minutes via Gemini API ({settings.GEMINI_MODEL}).")
-            return result
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse Gemini response into JSON. Decoding Error: {e}")
-            logger.error(f"Raw response text: {text}")
-            return {
-                "summary": "Failed to extract structured summary due to formatting error from Gemini API.",
-                "action_items": [],
-                "key_decisions": []
-            }
-        except Exception as e:
-            logger.error(f"Error during Gemini API execution: {e}")
-            return {
-                "summary": f"AI Summarization Failed: An error occurred during Gemini API execution. Details: {str(e)}",
-                "action_items": [],
-                "key_decisions": []
-            }
+        text = await asyncio.to_thread(_call_gemini)
+        text = text.strip()
+        return json.loads(text)
 
-    # --- ROUTE 2: Groq API (Online Cloud Model) ---
-    else:
+    elif provider.lower() == "groq":
         if not settings.GROQ_API_KEY or not settings.GROQ_API_KEY.strip():
             logger.error("Groq API requested but GROQ_API_KEY is not configured.")
-            return {
-                "summary": "AI Summarization Failed: GROQ_API_KEY is missing from environment. Please add it to your .env file.",
-                "action_items": [],
-                "key_decisions": []
-            }
+            raise ValueError("GROQ_API_KEY is missing from environment.")
 
-        logger.info(f"Using Groq API (model: {settings.GROQ_MODEL}) in the cloud...")
+        logger.info(f"Using Groq API (model: {model_name}) in the cloud...")
         
         def _call_groq():
             payload = {
-                "model": settings.GROQ_MODEL,
+                "model": model_name,
                 "messages": [
                     {
                         "role": "user",
@@ -120,41 +88,138 @@ async def generate_meeting_minutes(transcript: str) -> dict:
                 return choices[0].get("message", {}).get("content", "").strip()
             raise ValueError("No choices returned from Groq API")
 
-        try:
-            logger.info("Awaiting online response from Groq API...")
-            text = await asyncio.to_thread(_call_groq)
-            
-            # Defensive cleanup
-            if text.startswith("```json"):
-                text = text[7:]
-            if text.startswith("```"):
-                text = text[3:]
-            if text.endswith("```"):
-                text = text[:-3]
-                
-            text = text.strip()
-            
-            # Parse into dictionary
-            result = json.loads(text)
-            logger.info(f"✅ Successfully generated structured meeting minutes via Groq API ({settings.GROQ_MODEL}).")
-            return result
-            
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Failed to connect to Groq server. Error: {e}")
-            return {
-                "summary": f"AI Summarization Failed: Could not connect to the Groq API endpoint. Ensure internet connection and API key are valid.",
-                "action_items": [],
-                "key_decisions": []
+        text = await asyncio.to_thread(_call_groq)
+        
+        # Defensive cleanup of code blocks if any
+        if text.startswith("```json"):
+            text = text[7:]
+        if text.startswith("```"):
+            text = text[3:]
+        if text.endswith("```"):
+            text = text[:-3]
+        text = text.strip()
+        
+        return json.loads(text)
+    else:
+        raise ValueError(f"Unknown LLM Provider: {provider}")
+
+
+async def judge_candidates(transcript: str, candidates: list) -> dict:
+    """Evaluate candidate meeting minutes and choose the best index using the Judge LLM."""
+    judge_provider = settings.JUDGE_PROVIDER
+    judge_model = settings.JUDGE_MODEL
+
+    candidates_formatted = []
+    for idx, c in enumerate(candidates):
+        candidates_formatted.append(
+            f"Candidate {idx} (Model: {c['model_name']}):\n"
+            f"Agenda:\n{c.get('agenda')}\n"
+            f"Summary:\n{c.get('summary')}\n"
+            f"Key Decisions:\n{c.get('key_decisions')}\n"
+            f"Action Items:\n{c.get('action_items')}\n"
+        )
+    candidates_str = "\n\n".join(candidates_formatted)
+
+    prompt = f"""
+    You are an expert editor and quality inspector. Analyze the following meeting transcript and evaluate three candidate meeting minutes generated by different AI models.
+    
+    Choose the best candidate among the three. Provide a reasoning for why it is the best.
+    
+    Original Meeting Transcript:
+    ---
+    {transcript}
+    ---
+    
+    Candidates:
+    ---
+    {candidates_str}
+    ---
+    
+    Provide your choice as a JSON object with exactly two keys:
+    - "best_index": (integer 0, 1, or 2) representing the index of the best candidate.
+    - "reasoning": (string) a detailed explanation of why this candidate was chosen as the best.
+    
+    Return ONLY valid JSON.
+    """
+
+    if judge_provider.lower() == "gemini":
+        if not settings.GEMINI_API_KEY or not settings.GEMINI_API_KEY.strip():
+            logger.error("Gemini API requested for Judge but GEMINI_API_KEY is not configured.")
+            raise ValueError("GEMINI_API_KEY is missing from environment.")
+
+        logger.info(f"Using Google Gemini API for Judge (model: {judge_model})...")
+        
+        def _call_gemini():
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+            model = genai.GenerativeModel(
+                model_name=judge_model,
+                generation_config={"response_mime_type": "application/json"}
+            )
+            response = model.generate_content(prompt)
+            return response.text
+
+        text = await asyncio.to_thread(_call_gemini)
+        text = text.strip()
+        return json.loads(text)
+
+    elif judge_provider.lower() == "groq":
+        if not settings.GROQ_API_KEY or not settings.GROQ_API_KEY.strip():
+            logger.error("Groq API requested for Judge but GROQ_API_KEY is not configured.")
+            raise ValueError("GROQ_API_KEY is missing from environment.")
+
+        logger.info(f"Using Groq API for Judge (model: {judge_model})...")
+        
+        def _call_groq():
+            payload = {
+                "model": judge_model,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                "response_format": { "type": "json_object" }
             }
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse Groq response into JSON. Decoding Error: {e}")
-            logger.error(f"Raw response text: {text}")
-            return {
-                "summary": "Failed to extract structured summary due to formatting error from Groq API.",
-                "action_items": [],
-                "key_decisions": []
+            headers = {
+                "Authorization": f"Bearer {settings.GROQ_API_KEY}"
             }
-        except Exception as e:
-             logger.error(f"Unexpected Error during Groq execution: {e}")
-             raise
+            response = requests.post(settings.GROQ_URL, json=payload, headers=headers, timeout=300)
+            response.raise_for_status() 
+            res_json = response.json()
+            
+            choices = res_json.get("choices", [])
+            if choices:
+                return choices[0].get("message", {}).get("content", "").strip()
+            raise ValueError("No choices returned from Groq API for Judge")
+
+        text = await asyncio.to_thread(_call_groq)
+        
+        # Defensive cleanup
+        if text.startswith("```json"):
+            text = text[7:]
+        if text.startswith("```"):
+            text = text[3:]
+        if text.endswith("```"):
+            text = text[:-3]
+        text = text.strip()
+        
+        return json.loads(text)
+    else:
+        raise ValueError(f"Unknown LLM Provider for Judge: {judge_provider}")
+
+
+async def generate_meeting_minutes(transcript: str) -> dict:
+    """Legacy wrapper function to generate meeting minutes using configured settings model."""
+    try:
+        model = settings.GEMINI_MODEL if settings.LLM_PROVIDER.lower() == "gemini" else settings.GROQ_MODEL
+        return await generate_meeting_minutes_for_model(transcript, settings.LLM_PROVIDER, model)
+    except Exception as e:
+        logger.error(f"Error during legacy generate_meeting_minutes: {e}")
+        return {
+            "agenda": "AI Summarization Failed: no agenda generated.",
+            "summary": f"AI Summarization Failed: {str(e)}",
+            "action_items": [],
+            "key_decisions": []
+        }
+
 

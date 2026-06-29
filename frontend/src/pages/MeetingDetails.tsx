@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { meetingApi } from '../services/api';
-import { ChevronLeft, FileText, Mic, CheckSquare, Clock, Users, RefreshCw, Mail } from 'lucide-react';
+import { ChevronLeft, FileText, Mic, CheckSquare, Clock, Users, RefreshCw, Mail, Bot, Award } from 'lucide-react';
 import clsx from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -9,7 +9,7 @@ export default function MeetingDetails() {
   const { id } = useParams<{ id: string }>();
   const [meeting, setMeeting] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'summary' | 'transcript' | 'action_items'>('summary');
+  const [activeTab, setActiveTab] = useState<'summary' | 'transcript' | 'action_items' | 'comparison'>('summary');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailStatus, setEmailStatus] = useState<'success' | 'error' | null>(null);
@@ -91,10 +91,11 @@ export default function MeetingDetails() {
   }
 
   const tabs = [
-    { id: 'summary',      name: 'Executive Summary',       icon: FileText },
-    { id: 'transcript',   name: 'Full Transcript',          icon: Mic },
-    { id: 'action_items', name: 'Action Items & Decisions', icon: CheckSquare },
-  ] as const;
+    { id: 'summary' as const,      name: 'Executive Summary',       icon: FileText },
+    ...(meeting.candidates && meeting.candidates.length > 0 ? [{ id: 'comparison' as const, name: 'AI Comparison', icon: Bot }] : []),
+    { id: 'transcript' as const,   name: 'Full Transcript',          icon: Mic },
+    { id: 'action_items' as const, name: 'Action Items & Decisions', icon: CheckSquare },
+  ];
 
   const sc =
     meeting.status === 'completed'
@@ -240,6 +241,12 @@ export default function MeetingDetails() {
             {/* Summary */}
             {activeTab === 'summary' && (
               <div>
+                {meeting.agenda && (
+                  <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Agenda</h3>
+                    <p className="text-gray-700 dark:text-gray-300 font-semibold">{meeting.agenda}</p>
+                  </div>
+                )}
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Summary</h3>
                 {meeting.summary ? (
                   <div
@@ -251,6 +258,83 @@ export default function MeetingDetails() {
                 )}
               </div>
             )}
+
+            {/* AI Comparison */}
+            {activeTab === 'comparison' && meeting.candidates && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {meeting.candidates.map((c: any, index: number) => {
+                    const isBest = index === meeting.best_candidate_index;
+                    return (
+                      <div key={index} className={clsx(
+                        "border rounded-2xl p-6 transition-all relative flex flex-col justify-between",
+                        isBest 
+                          ? "border-indigo-500 bg-indigo-50/10 dark:bg-indigo-950/10 shadow-md ring-2 ring-indigo-500/20"
+                          : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                      )}>
+                        {isBest && (
+                          <span className="absolute -top-3 left-6 px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full flex items-center gap-1 shadow-sm">
+                            <Award className="w-3.5 h-3.5" /> Best Choice
+                          </span>
+                        )}
+                        <div>
+                          <div className="flex items-center justify-between mb-4">
+                            <h4 className="text-lg font-bold text-gray-900 dark:text-white">
+                              {c.model_name}
+                            </h4>
+                            <span className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 font-medium border border-gray-200 dark:border-gray-600">
+                              {c.provider.toUpperCase()}
+                            </span>
+                          </div>
+                          
+                          <div className="space-y-4">
+                            {c.agenda && (
+                              <div>
+                                <h5 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Agenda</h5>
+                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed mb-3">
+                                  {c.agenda}
+                                </p>
+                              </div>
+                            )}
+
+                            <div>
+                              <h5 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Summary</h5>
+                              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                                {c.summary}
+                              </p>
+                            </div>
+                            
+                            {c.key_decisions && c.key_decisions.length > 0 && (
+                              <div>
+                                <h5 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Key Decisions</h5>
+                                <ul className="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                                  {c.key_decisions.map((d: string, idx: number) => (
+                                    <li key={idx}>{d}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            
+                            {c.action_items && c.action_items.length > 0 && (
+                              <div>
+                                <h5 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Action Items</h5>
+                                <ul className="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                                  {c.action_items.map((item: any, idx: number) => {
+                                    const text = typeof item === 'object' ? item.task : item;
+                                    return <li key={idx}>{text}</li>;
+                                  })}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
 
             {/* Transcript */}
             {activeTab === 'transcript' && (

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { meetingApi } from '../services/api';
 import { Link } from 'react-router-dom';
 import { Clock, Search, ChevronRight, FileAudio } from 'lucide-react';
-import { format } from 'date-fns';
 
 export default function History() {
   const [meetings, setMeetings] = useState<any[]>([]);

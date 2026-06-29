@@ -22,7 +22,7 @@ class Settings:
 
     # Google Gemini API
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
     # LLM Provider selection: gemini, groq
     LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "groq")
@@ -31,6 +31,19 @@ class Settings:
     GROQ_URL: str = os.getenv("GROQ_URL", "https://api.groq.com/openai/v1/chat/completions")
     GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+
+    # Multi-LLM Configuration
+    LLM_1_PROVIDER: str = os.getenv("LLM_1_PROVIDER", "gemini")
+    LLM_1_MODEL: str = os.getenv("LLM_1_MODEL", "gemini-2.5-flash")
+
+    LLM_2_PROVIDER: str = os.getenv("LLM_2_PROVIDER", "groq")
+    LLM_2_MODEL: str = os.getenv("LLM_2_MODEL", "llama-3.1-8b-instant")
+
+    LLM_3_PROVIDER: str = os.getenv("LLM_3_PROVIDER", "groq")
+    LLM_3_MODEL: str = os.getenv("LLM_3_MODEL", "llama-3.3-70b-versatile")
+
+    JUDGE_PROVIDER: str = os.getenv("JUDGE_PROVIDER", "groq")
+    JUDGE_MODEL: str = os.getenv("JUDGE_MODEL", "llama-3.3-70b-versatile")
 
     # SMTP Email Configuration
     SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.gmail.com")
