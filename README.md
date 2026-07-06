@@ -9,6 +9,7 @@ Built with a modern stack featuring **React (Vite, TypeScript, TailwindCSS)**, *
 ## 📋 Table of Contents
 - [🌟 Key Features](#-key-features)
 - [📸 Screen Previews](#-screen-previews)
+- [📊 Sample Analyzed Result](#-sample-analyzed-result-multi-llm-consensus)
 - [🏗️ System Architecture](#️-system-architecture)
 - [🛠️ Tech Stack](#-tech-stack)
 - [📁 Project Structure](#-project-structure)
@@ -58,6 +59,79 @@ The settings panel enables user profile management and configuring Cloud LLM pro
   <img src="assets/settings_profile.png" width="49%" alt="Profile Settings" />
   <img src="assets/settings_llm.png" width="49%" alt="AI / LLM Settings" />
 </p>
+
+---
+
+## 📊 Sample Analyzed Result (Multi-LLM Consensus)
+
+The application supports a **Multi-LLM Pipeline** where the Whisper transcript is processed by multiple candidate LLMs (e.g., Gemini, LLaMA, Mixtral) in parallel. A **Judge LLM** then reviews the output candidates, selects the best candidate, and provides the reasoning for the selection.
+
+Below is a real-world example of the structured database output stored in MongoDB for a completed meeting:
+
+```json
+{
+  "_id": "6a4232e65b0967a388b84177",
+  "title": "meeting-clip1",
+  "participants": [
+    "venkatatheerth@gmail.com"
+  ],
+  "audio_path": "storage\\audio\\meeting_6a4232e65b0967a388b84177.mp3",
+  "status": "completed",
+  "transcript": "Zack es gallan tindangad baptized optimization...",
+  "agenda": "Unable to determine a specific agenda due to the unintelligible nature of the provided meeting transcript.",
+  "summary": "The provided meeting transcript is composed of text that appears to be either severely corrupted, mixed with non-standard characters, or written in a language that is not discernible for meaningful analysis...",
+  "action_items": [
+    "No specific action items could be identified or assigned due to the unintelligible nature of the meeting transcript."
+  ],
+  "key_decisions": [
+    "No key decisions could be identified or inferred from the provided unintelligible transcript."
+  ],
+  "best_candidate_index": 0,
+  "best_candidate_reasoning": "While none of the candidates provided a perfect summary due to the unintelligible nature of the meeting transcript, Candidate 0 is chosen as the best. This is because it honestly and transparently admits the inability to understand the transcript, providing a clear explanation of the limitations and challenges faced. Unlike the other candidates, it does not introduce speculative or fabricated information...",
+  "candidates": [
+    {
+      "model_name": "Gemini 1.5 Flash",
+      "provider": "gemini",
+      "model_id": "gemini-2.5-flash",
+      "agenda": "Unable to determine a specific agenda due to the unintelligible nature of the provided meeting transcript.",
+      "summary": "The provided meeting transcript is composed of text that appears to be either severely corrupted...",
+      "action_items": [
+        "No specific action items could be identified or assigned due to the unintelligible nature of the meeting transcript."
+      ],
+      "key_decisions": [
+        "No key decisions could be identified or inferred from the provided unintelligible transcript."
+      ],
+      "error": null
+    },
+    {
+      "model_name": "LLaMA 3.1 8B",
+      "provider": "groq",
+      "model_id": "llama-3.1-8b-instant",
+      "agenda": "Review and discussion of ongoing projects and optimization opportunities.",
+      "summary": "Unfortunately, much of the meeting transcript was in a language and format that was not easily decipherable...",
+      "action_items": [],
+      "key_decisions": [],
+      "error": null
+    },
+    {
+      "model_name": "Mixtral 8x7B",
+      "provider": "groq",
+      "model_id": "llama-3.3-70b-versatile",
+      "agenda": "Review and discussion of optimization strategies and their impact on the company's growth",
+      "summary": "The meeting began with an introduction to the concept of optimization and its relevance...",
+      "action_items": [
+        "Develop a comprehensive optimization plan",
+        "Assign a team to lead the optimization effort"
+      ],
+      "key_decisions": [
+        "To pursue an optimization strategy to drive company growth",
+        "To establish a dedicated team to lead the optimization effort"
+      ],
+      "error": null
+    }
+  ]
+}
+```
 
 ---
 
