@@ -133,6 +133,40 @@ Below is a real-world example of the structured database output stored in MongoD
 }
 ```
 
+### 📝 Human-Readable Output Example
+
+When a meeting is successfully processed, the application renders a clean, professional dashboard view and dispatches a formatted HTML email containing the following details:
+
+---
+
+<div align="center">
+  <h2>🎙️ Meeting Minutes: Project Optimization Alignment</h2>
+</div>
+
+* **Participants**: `venkatatheerth@gmail.com`
+* **Status**: `✅ Completed`
+* **Agenda**: Review and discussion of optimization strategies and their impact on the company's growth.
+
+#### 📄 Executive Summary
+> The meeting began with an introduction to the concept of optimization and its relevance to the company's current situation. It was noted that the company is facing challenges in terms of growth and that optimization could be a key factor in overcoming these challenges. 
+> 
+> The attendees discussed the importance of analyzing data and identifying areas where optimization can be applied. They also touched on the need for effective communication and collaboration among team members to ensure successful implementation of optimization strategies. 
+> 
+> Furthermore, the meeting addressed the topic of change management and the importance of preparing the company for potential changes that may arise. The attendees emphasized the value of continuous learning and improvement, recognizing that optimization is a journey rather than a destination.
+
+#### 🎯 Key Decisions Made
+* **Pursue an optimization strategy** to drive company growth and efficiency.
+* **Establish a dedicated, cross-functional team** to lead and manage the optimization effort.
+* **Allocate additional budget and resources** to support optimization initiatives.
+* **Develop a comprehensive communication plan** to engage key stakeholders and align team members.
+
+#### 📋 Action Items & Assigned Tasks
+* ⬜ **Develop a comprehensive optimization plan** (Assignee: Project Lead)
+* ⬜ **Form and assign the dedicated team to lead the optimization effort** (Assignee: Management / HR)
+* ⬜ **Establish a clear timeline for implementation** (Assignee: PMO / Project Lead)
+* ⬜ **Identify and allocate necessary resources** (Assignee: Finance / Operations)
+* ⬜ **Develop a communication strategy to engage stakeholders** (Assignee: Marketing & Communications)
+
 ---
 
 ## 🏗️ System Architecture
