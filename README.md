@@ -14,6 +14,7 @@ Built with a modern stack featuring **React (Vite, TypeScript, TailwindCSS)**, *
 - [🛠️ Tech Stack](#-tech-stack)
 - [📁 Project Structure](#-project-structure)
 - [🚀 Getting Started](#-getting-started)
+  - [🌐 Cloud Deployment (Production)](#-cloud-deployment-production)
   - [Prerequisites](#prerequisites)
   - [1. MongoDB Local Service](#1-mongodb-local-service)
   - [2. Cloud LLM Setup (Groq or Gemini)](#2-cloud-llm-setup-groq-or-gemini)
@@ -245,6 +246,9 @@ meeting-minutes-generator/
 ---
 
 ## 🚀 Getting Started
+
+### 🌐 Cloud Deployment (Production)
+For hosting the application in the cloud (using MongoDB Atlas, Render, and Vercel), see the step-by-step [Cloud Deployment Guide](deployment_guide.md).
 
 ### Prerequisites
 * **Python 3.10 or 3.11**

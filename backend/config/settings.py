@@ -20,6 +20,9 @@ class Settings:
     MONGO_URI: str = os.getenv("MONGO_URI", "mongodb://localhost:27017/meeting_minutes_db")
     DATABASE_NAME: str = "meeting_minutes_db"
 
+    # CORS Origins (Comma-separated list)
+    CORS_ORIGINS: str = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000")
+
     # Google Gemini API
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
