@@ -91,7 +91,7 @@ The settings panel enables user profile management and configuring Cloud LLM pro
 ## 📁 Project Structure
 
 ```
-meeting-minutes-ai/
+meeting-minutes-generator/
 ├── frontend/               # React client application (Vite + TS)
 │   ├── src/
 │   │   ├── components/     # UI elements (Dashboard, Upload, MeetingView)
