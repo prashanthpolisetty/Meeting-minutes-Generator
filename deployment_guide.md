@@ -16,7 +16,7 @@ To host your database in the cloud:
 4. **Network Access**: Add an IP access rule for `0.0.0.0/0` (Allow Access from Anywhere) to let Render's backend containers connect to it.
 5. **Get Connection URL**: Click **Connect** -> **Drivers** -> Copy the connection string. Replace `<db_password>` with your database user password. The string will look like this:
    ```ini
-   mongodb+srv://db_user:YOUR_PASSWORD@cluster0.abcde.mongodb.net/meeting_minutes_db?retryWrites=true&w=majority
+   mongodb+srv://<username>:<password>@<your-cluster-address>/meeting_minutes_db?retryWrites=true&w=majority
    ```
 
 ---
