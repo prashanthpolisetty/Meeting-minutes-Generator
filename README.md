@@ -156,7 +156,7 @@ When a meeting is successfully processed, the application renders a clean, profe
   <h2>🎙️ Meeting Minutes: Project Optimization Alignment</h2>
 </div>
 
-* **Participants**: `venkatatheerth@gmail.com`
+* **Participants**: `prashanth@gmail.com`
 * **Status**: `✅ Completed`
 * **Agenda**: Review and discussion of optimization strategies and their impact on the company's growth.
 
