@@ -49,10 +49,17 @@ async def process_meeting(meeting_id: str):
         logger.info(f"Pipeline: Executing Summarization Agents for {meeting_id}...")
         
         # Configure models to run
+        # candidates_config = [
+        #     {"name": "Gemini 1.5 Flash", "provider": settings.LLM_1_PROVIDER, "model": settings.LLM_1_MODEL},
+        #     {"name": "LLaMA 3.1 8B", "provider": settings.LLM_2_PROVIDER, "model": settings.LLM_2_MODEL},
+        #     {"name": "Mixtral 8x7B", "provider": settings.LLM_3_PROVIDER, "model": settings.LLM_3_MODEL}
+        # ]
         candidates_config = [
-            {"name": "Gemini 1.5 Flash", "provider": settings.LLM_1_PROVIDER, "model": settings.LLM_1_MODEL},
-            {"name": "LLaMA 3.1 8B", "provider": settings.LLM_2_PROVIDER, "model": settings.LLM_2_MODEL},
-            {"name": "Mixtral 8x7B", "provider": settings.LLM_3_PROVIDER, "model": settings.LLM_3_MODEL}
+            {
+                "name": "Gemini",
+                "provider": settings.LLM_1_PROVIDER,
+                "model": settings.LLM_1_MODEL
+            }
         ]
 
         # Helper task for concurrent execution with error resilience
