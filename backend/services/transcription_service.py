@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 # Global variable to cache the model in memory
 _model = None
 
-def _get_whisper_model(model_size: str = "base"):
+def _get_whisper_model(model_size: str = "tiny"):
     """Loads and caches the Whisper model."""
     global _model
     if _model is None:
