@@ -99,17 +99,45 @@ async def process_meeting(meeting_id: str):
 
         # 3.5. Execute the Judge LLM
         logger.info(f"Pipeline: Executing Judge LLM to evaluate candidates for {meeting_id}...")
-        try:
-            judge_res = await judge_candidates(transcript, candidates)
-            best_idx = int(judge_res.get("best_index", 0))
-            if best_idx < 0 or best_idx >= len(candidates):
-                logger.warning(f"Judge returned out of bounds index {best_idx}. Defaulting to 0.")
-                best_idx = 0
-            reasoning = judge_res.get("reasoning", "Chosen by default.")
-        except Exception as e:
-            logger.error(f"Judge LLM failed: {e}. Defaulting to Candidate 0.")
+        # try:
+        #     judge_res = await judge_candidates(transcript, candidates)
+        #     best_idx = int(judge_res.get("best_index", 0))
+        #     if best_idx < 0 or best_idx >= len(candidates):
+        #         logger.warning(f"Judge returned out of bounds index {best_idx}. Defaulting to 0.")
+        #         best_idx = 0
+        #     reasoning = judge_res.get("reasoning", "Chosen by default.")
+        # except Exception as e:
+        #     logger.error(f"Judge LLM failed: {e}. Defaulting to Candidate 0.")
+        #     best_idx = 0
+        #     reasoning = f"Judge failed to evaluate. Defaulted to candidate 0. Details: {str(e)}"
+        if len(candidates) == 1:
             best_idx = 0
-            reasoning = f"Judge failed to evaluate. Defaulted to candidate 0. Details: {str(e)}"
+            reasoning = "Single-model deployment mode."
+        else:
+            try:
+                judge_res = await judge_candidates(transcript, candidates)
+                best_idx = int(judge_res.get("best_index", 0))
+        
+                if best_idx < 0 or best_idx >= len(candidates):
+                    logger.warning(
+                        f"Judge returned out of bounds index {best_idx}. Defaulting to 0."
+                    )
+                    best_idx = 0
+        
+                reasoning = judge_res.get(
+                    "reasoning",
+                    "Chosen by Judge LLM."
+                )
+        
+            except Exception as e:
+                logger.error(f"Judge LLM failed: {e}. Defaulting to Candidate 0.")
+                best_idx = 0
+                reasoning = (
+                    f"Judge failed to evaluate. "
+                    f"Defaulted to candidate 0. Details: {str(e)}"
+                )
+
+        
 
         # Get winner content
         winner = candidates[best_idx]
